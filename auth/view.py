@@ -3,10 +3,9 @@ import random
 import string
 
 from fastapi.responses import JSONResponse
-import jwt, uuid, pymysql, os
+import jwt, uuid, os
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jwt.exceptions import InvalidTokenError
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 
@@ -22,7 +21,7 @@ from typing import List
 from dotenv import load_dotenv
 
 load_dotenv()
-password = os.getenv("password")
+password = os.getenv("password") # Find JWT password generator
 
 DATABASE_URL = f"mysql+pymysql://root:{password}@127.0.0.1/USERDB"
 
