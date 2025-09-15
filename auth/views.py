@@ -227,12 +227,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         playload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = playload.get("sub")
-        if email is not None:
+        if email is None:
             raise credentials_exception
     except jwt.PyJWKClientError:
         raise credentials_exception
     
     user = get_user(db, email=email)
-    if user is not None:
+    if user is None:
         raise credentials_exception
     return user

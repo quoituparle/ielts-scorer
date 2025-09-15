@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from ..database import get_db
 from ..auth.views import get_current_user
-from models import User
+from ..models import User
 
 
 router = APIRouter(prefix="/main", tags=["Main App"])
