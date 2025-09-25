@@ -4,6 +4,8 @@ import uuid
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 from sqladmin import ModelView
+from starlette.requests import Request
+
 
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -45,6 +47,9 @@ class UserAdmin( ModelView, model=User):
     name_plural = "Users"
     icon = "fa-solid fa-user"
     identity = "user"
+
+    def is_accessible(self, request: Request) -> bool:
+        return request.session.get("is_superuser", False) 
 
 class TopicAdmin(ModelView, model=Topic):
     column_list = [Topic.essay_topic, Topic.essay_topic_id]

@@ -5,11 +5,11 @@ from sqladmin import Admin
 from .auth import views as auth_views
 from .core import views as main_views
 from .admin import admin as admin_app
+from .admin.admin import authentication_backend
+from .models import UserAdmin, TopicAdmin
 from .database import engine
 
 app = FastAPI()
-
-admin = Admin(app, engine)
 
 origins = [
     "http://localhost:5173",
@@ -31,6 +31,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(admin_app.router)
 app.include_router(auth_views.router)
 app.include_router(main_views.router)
-app.include_router(admin_app.router)
+
+admin = Admin(app=app, engine=engine, authentication_backend=authentication_backend, templates_dir="admin_templates")
+admin.add_view(UserAdmin)
+admin.add_view(TopicAdmin)
