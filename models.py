@@ -1,8 +1,9 @@
 import datetime
 import uuid
 
+from typing import List
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 from sqladmin import ModelView, expose, BaseView
 from starlette.requests import Request
 
@@ -31,12 +32,20 @@ class User(UserBase, table=True):
     api_key: str | None = Field(default=None)
     language: str
 
+class Essay(SQLModel, table=True):
+    essay_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    published_date: datetime.datetime = Field(default_factory=datetime.timezone.utc)
+    content: str
+    score: str
+    topic_id: uuid.UUID = Field(foreign_key="topic.topic_id")   #Use topic instead of Topic, handle database.
+    topic: "Topic" = Relationship(back_populates="essays")
+
+
 class Topic(SQLModel, table=True):
-    essay_topic_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    essay_topic: str
-    published_essay: str | None
-    published_score: float | None
-    published_date: datetime.datetime | None = Field(default=None)
+    topic_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    topic: str
+    essays: List["Essay"] = Relationship(back_populates="topic")
+
 
 class UserAdmin( ModelView, model=User):
     column_list = [User.id, User.full_name, User.email]
@@ -52,8 +61,8 @@ class UserAdmin( ModelView, model=User):
         return request.session.get("is_superuser", False) 
 
 class TopicAdmin(ModelView, model=Topic):
-    column_list = [Topic.essay_topic, Topic.essay_topic_id]
-    form_columns = [Topic.essay_topic]
+    column_list = [Topic.topic, Topic.topic_id]
+    form_columns = [Topic.topic]
     
     def is_accessible(self, request: Request) -> bool:
         return request.session.get("is_superuser", False) 
