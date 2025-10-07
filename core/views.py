@@ -1,7 +1,7 @@
 import uuid
 import datetime
 from fastapi import  status, HTTPException, APIRouter, Depends
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from google import genai
 from google.genai import types
@@ -137,37 +137,64 @@ async def delete_user_account(db: Session = Depends(get_db), current_user : User
 @router.get('/topics/', status_code=200)
 # User can see all the published topics
 async def get_topic_data(db: Session = Depends(get_db)):
-    topics = db.exec(Topic).all()
+    statement = select(Topic)
+    topics = db.exec(statement).all()
     if not topics:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No topics in playground")
     return topics
 
-def rank_essay_score(score: str, date: str, name: str):
-    ranked_data = sorted(score, reverse=True)
-    results = []
-    for i, val in enumerate(ranked_data, start=1):
-        data = {
-            "rank": i,
-            "score": val,
-            "published_date": date,
-            "name": name,
-        },
-        results.append(data)
-    return results
-
-def essay_time(score: str, date: str, name: str):
-    time_data = sorted(date, reverse=True)
-    results = []
-    for i in time_data:
-        data = {
-            "score": score,
-            "published_date": date,
-            "name": name,
-        }
-        results.append(data)
-    return results
 
 @router.get('/topic/{topic_id}/essays', status_code=200)
 # This API shows detail of the topic and include essays of other users. Also include ranking function.
 async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
     topic = db.get(Topic, topic_id)
+    if not topic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cannot find topic, please try again")
+    
+    essays = topic.essays
+
+    essays_ranked_by_score = sorted(essays, key=lambda e: float(e.score), reverse=True)
+    essays_ranked_by_time = sorted(essays, key=lambda e: e.published_date, reverse=True)
+
+    return {
+        "topic": topic,
+        "score_rank": essays_ranked_by_score,
+        "time_rank": essays_ranked_by_time,
+    }
+
+class essay_create(BaseModel):
+    content: str
+    score: str | None
+
+@router.post('/topic/{topic_id}/essays', status_code=201)
+# This API allow users to publish their scored essay
+async def create_essay(
+    topic_id: uuid.UUID,
+    essay_data: essay_create,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    topic = db.get(Topic, topic_id)
+    if not topic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cannot find topic, please try again")
+    
+    new_essay = Essay(
+        content=essay_data.content,
+        score=essay_data.score,
+        user_id=current_user.id,
+        topic_id=topic_id
+    )
+
+    db.add(new_essay)
+    try:
+        db.commit()
+        db.refresh(new_essay)
+    except Exception as e:
+        db.rollback()
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not save essay")
+    
+    return new_essay
+
+
+    
