@@ -164,7 +164,8 @@ async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
 
 class essay_create(BaseModel):
     content: str
-    score: float | None
+    score: str | None
+    
 
 @router.post('/topic/{topic_id}/essays', status_code=201)
 # This API allow users to publish their scored essay

@@ -38,6 +38,7 @@ app.include_router(auth_views.router)
 app.include_router(main_views.router)
 
 admin = Admin(templates_dir="my_templates", app=app, engine=engine, authentication_backend=authentication_backend)
+# change view function in sqladmin have conflict, cannot change the existing page
 admin.add_view(UserAdmin)
 admin.add_view(TopicAdmin)
 

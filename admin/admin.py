@@ -18,9 +18,14 @@ load_dotenv()
 router = APIRouter(prefix="/admin", tags=["Admin App"])
 
 def make_admin(db: Session, email: str):
+    admin_email = os.getenv('admin_email')
+
     update_user = get_user(db, email)
 
-    update_user.is_superuser = True
+    if update_user.is_superuser == True:
+        return
+    else:
+        update_user.is_superuser
 
     try:
         db.add(update_user)
