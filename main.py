@@ -15,22 +15,8 @@ from .admin.admin import AdminAuthProvider
 app = FastAPI()
 
 origins = [
-    "https://bandsense.vercel.app",
-    "https://bandsense.vercel.app/api/login",
-    "https://bandsense.vercel.app/api/register",
-    "https://bandsense.vercel.app/api/main/user/me",
-    "https://bandsense.vercel.app/api/main/user/storage",
-    "https://bandsense.vercel.app/api/main/response",
-    "https://bandsense.vercel.app/api/main/user/delete",
-    "https://bandsense.vercel.app/api/main/user/info",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/login/",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/register/",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/main/user/me",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/main/user/storage",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/main/response",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/main/user/delete",
-    "https://bandify-r8h3b2m8q-flybutters-projects.vercel.app/api/main/user/info"
+    "https://bandsense.vercel.app", 
+    "http://localhost:5173"          
 
 ]
 
